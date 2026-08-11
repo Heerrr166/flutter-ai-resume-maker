@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+
+node_modules/
+build/
+.dart_tool/
+.idea/
+.vscode/
+*.log
+.claude/
+backend/.mongo-data/
+.flutter-plugins-dependencies
+.flutter-plugins-dependencies

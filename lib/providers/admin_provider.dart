@@ -1,0 +1,99 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../models/user_model.dart';
+import '../repositories/admin_repository.dart';
+import 'auth_provider.dart';
+
+final adminRepositoryProvider = Provider<AdminRepository>((ref) {
+  return AdminRepository(apiService: ref.read(apiServiceProvider));
+});
+
+class AdminUsersState {
+  final List<UserModel> users;
+  final int page;
+  final int totalPages;
+  final int total;
+  final bool isLoading;
+  final String? error;
+  final Set<String> deletingIds;
+
+  const AdminUsersState({
+    this.users = const [],
+    this.page = 1,
+    this.totalPages = 1,
+    this.total = 0,
+    this.isLoading = false,
+    this.error,
+    this.deletingIds = const {},
+  });
+
+  AdminUsersState copyWith({
+    List<UserModel>? users,
+    int? page,
+    int? totalPages,
+    int? total,
+    bool? isLoading,
+    String? error,
+    Set<String>? deletingIds,
+  }) {
+    return AdminUsersState(
+      users: users ?? this.users,
+      page: page ?? this.page,
+      totalPages: totalPages ?? this.totalPages,
+      total: total ?? this.total,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      deletingIds: deletingIds ?? this.deletingIds,
+    );
+  }
+}
+
+class AdminUsersNotifier extends StateNotifier<AdminUsersState> {
+  AdminUsersNotifier(this._repo) : super(const AdminUsersState()) {
+    fetchPage(1);
+  }
+
+  final AdminRepository _repo;
+
+  Future<void> fetchPage(int page) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final result = await _repo.fetchUsers(page: page);
+      state = state.copyWith(
+        users: result.users,
+        page: result.page,
+        totalPages: result.totalPages,
+        total: result.total,
+        isLoading: false,
+      );
+    } catch (_) {
+      state = state.copyWith(isLoading: false, error: 'Failed to load users');
+    }
+  }
+
+  Future<bool> deleteUser(String id) async {
+    state = state.copyWith(deletingIds: {...state.deletingIds, id});
+    try {
+      await _repo.deleteUser(id);
+      final remaining = state.users.where((u) => u.id != id).toList();
+      final nextDeleting = {...state.deletingIds}..remove(id);
+      state = state.copyWith(
+        users: remaining,
+        total: state.total > 0 ? state.total - 1 : 0,
+        deletingIds: nextDeleting,
+      );
+      if (remaining.isEmpty && state.page > 1) {
+        await fetchPage(state.page - 1);
+      }
+      return true;
+    } catch (_) {
+      final nextDeleting = {...state.deletingIds}..remove(id);
+      state = state.copyWith(deletingIds: nextDeleting);
+      return false;
+    }
+  }
+}
+
+final adminUsersProvider = StateNotifierProvider<AdminUsersNotifier, AdminUsersState>((ref) {
+  return AdminUsersNotifier(ref.read(adminRepositoryProvider));
+});
