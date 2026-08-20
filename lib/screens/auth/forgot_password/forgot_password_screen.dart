@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/premium_button.dart';
 import '../../../core/widgets/premium_card.dart';
@@ -83,61 +84,68 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () => context.go(AppRoutes.login),
-                    icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.onSurface),
-                  ),
-                  Text('Recover Account', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 48),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              PremiumCard(
-                padding: const EdgeInsets.all(24),
-                gradient: LinearGradient(
-                  colors: [theme.colorScheme.primary.withAlpha((0.15 * 255).round()), theme.colorScheme.surface],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+          child: LayoutBuilder(builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 800;
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: isWide ? 720 : double.infinity),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Forgot your password?', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Enter the email associated with your account to request a password reset code.',
-                      style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withAlpha((0.78 * 255).round()), height: 1.5),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => context.go(AppRoutes.login),
+                          icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.onSurface),
+                        ),
+                        const SizedBox(width: 8),
+                        SectionHeader(title: 'Recover Account'),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    Form(
-                      key: _formKey,
-                      child: PremiumTextField(
-                        controller: _emailController,
-                        label: 'Email address',
-                        hintText: 'you@example.com',
-                        keyboardType: TextInputType.emailAddress,
-                        validator: Validators.validateEmail,
-                        prefixIcon: const Icon(Icons.email_outlined),
+                    PremiumCard(
+                      padding: const EdgeInsets.all(24),
+                      gradient: LinearGradient(
+                        colors: [theme.colorScheme.primary.withAlpha((0.15 * 255).round()), theme.colorScheme.surface],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    PremiumButton(
-                      label: 'Send Reset OTP',
-                      onPressed: _handleSendLink,
-                      isLoading: isLoading,
-                      backgroundColor: theme.colorScheme.primary,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Forgot your password?', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            'Enter the email associated with your account to request a password reset code.',
+                            style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withAlpha((0.78 * 255).round()), height: 1.5),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Form(
+                            key: _formKey,
+                            child: PremiumTextField(
+                              controller: _emailController,
+                              label: 'Email address',
+                              hintText: 'you@example.com',
+                              keyboardType: TextInputType.emailAddress,
+                              validator: Validators.validateEmail,
+                              prefixIcon: const Icon(Icons.email_outlined),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          PremiumButton(
+                            label: 'Send Reset OTP',
+                            onPressed: _handleSendLink,
+                            isLoading: isLoading,
+                            backgroundColor: theme.colorScheme.primary,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            );
+          }),
         ),
       ),
     );

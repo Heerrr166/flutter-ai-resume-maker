@@ -14,6 +14,10 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String adminUsers = '/admin/users';
+  static const String adminBase = '/admin';
+  static const String adminOverview = '/admin/overview';
+  static const String adminResumes = '/admin/resumes';
+  static const String adminAnalytics = '/admin/analytics';
 
   static const String splashName = 'splash';
   static const String onboardingName = 'onboarding';
@@ -28,6 +32,9 @@ class AppRoutes {
   static const String profileName = 'profile';
   static const String settingsName = 'settings';
   static const String adminUsersName = 'admin-users';
+  static const String adminOverviewName = 'admin-overview';
+  static const String adminResumesName = 'admin-resumes';
+  static const String adminAnalyticsName = 'admin-analytics';
 
   static String resumeEditorPath(String resumeId) => '/resume/$resumeId/edit';
 

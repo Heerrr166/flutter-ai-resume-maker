@@ -163,25 +163,41 @@ class _ResumeEditorViewState extends ConsumerState<_ResumeEditorView> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    const PremiumCard(child: PersonalInfoSection()),
+                    _buildAiCareerToolsSection(context),
                     const SizedBox(height: 12),
-                    const PremiumCard(child: ProfessionalSummarySection()),
-                    const SizedBox(height: 12),
-                    const PremiumCard(child: EducationSection()),
-                    const SizedBox(height: 12),
-                    const PremiumCard(child: ExperienceSection()),
-                    const SizedBox(height: 12),
-                    const PremiumCard(child: ProjectsSection()),
-                    const SizedBox(height: 12),
-                    const PremiumCard(child: SkillsSection()),
-                    const SizedBox(height: 12),
-                    const PremiumCard(child: CertificationsSection()),
-                    const SizedBox(height: 12),
-                    const PremiumCard(child: LanguagesSection()),
-                    const SizedBox(height: 12),
-                    const PremiumCard(child: AchievementsSection()),
-                    const SizedBox(height: 12),
-                    const PremiumCard(child: ReferencesSection()),
+                    // Responsive section grid: single column on narrow screens,
+                    // two columns on wide screens for a compact, professional layout.
+                    LayoutBuilder(builder: (context, constraints) {
+                      final sections = <Widget>[
+                        const PremiumCard(child: PersonalInfoSection()),
+                        const PremiumCard(child: ProfessionalSummarySection()),
+                        const PremiumCard(child: EducationSection()),
+                        const PremiumCard(child: ExperienceSection()),
+                        const PremiumCard(child: ProjectsSection()),
+                        const PremiumCard(child: SkillsSection()),
+                        const PremiumCard(child: CertificationsSection()),
+                        const PremiumCard(child: LanguagesSection()),
+                        const PremiumCard(child: AchievementsSection()),
+                        const PremiumCard(child: ReferencesSection()),
+                      ];
+
+                      if (constraints.maxWidth >= 900) {
+                        // Two-column grid with consistent spacing and min card width
+                        final gutter = 16.0;
+                        final totalWidth = constraints.maxWidth - gutter;
+                        final half = (totalWidth / 2) - (gutter / 2);
+                        final cardWidth = half.clamp(420.0, half);
+                        return Wrap(
+                          spacing: gutter,
+                          runSpacing: 16,
+                          children: sections.map((w) => SizedBox(width: cardWidth, child: w)).toList(),
+                        );
+                      }
+
+                      return Column(
+                        children: sections.expand((w) => [w, const SizedBox(height: 12)]).toList(),
+                      );
+                    }),
                     const SizedBox(height: 120),
                   ],
                 ),
@@ -194,11 +210,8 @@ class _ResumeEditorViewState extends ConsumerState<_ResumeEditorView> {
             ],
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: SafeArea(
+            child: SafeArea(
             top: false,
-            // Horizontally scrollable rather than a fixed Row: on narrow
-            // phones three full-label buttons plus the save-status text
-            // would otherwise clip or overflow instead of just scrolling.
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -706,4 +719,225 @@ class _ResumeEditorViewState extends ConsumerState<_ResumeEditorView> {
       },
     );
   }
+
+  Widget _buildAiCareerToolsSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final tools = [
+      _AiToolItem(
+        icon: Icons.analytics_outlined,
+        title: 'Resume Score',
+        subtitle: 'ATS score & feedback',
+        color: const Color(0xFF3B82F6),
+        onTap: () => _showAiScore(context),
+      ),
+      _AiToolItem(
+        icon: Icons.psychology_outlined,
+        title: 'AI Suggestions',
+        subtitle: 'Tailoring & smart insights',
+        color: const Color(0xFF8B5CF6),
+        onTap: () => _openAiCareerTools(context),
+      ),
+      _AiToolItem(
+        icon: Icons.description_outlined,
+        title: 'Cover Letter',
+        subtitle: 'Job-targeted letters',
+        color: const Color(0xFF10B981),
+        onTap: () => _showCoverLetterDialog(context),
+      ),
+      _AiToolItem(
+        icon: Icons.palette_outlined,
+        title: 'Templates',
+        subtitle: 'Change style & layout',
+        color: const Color(0xFFF59E0B),
+        onTap: () => _pickTemplate(context),
+      ),
+    ];
+
+    return PremiumCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.auto_awesome,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'AI Career Tools',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withAlpha(30),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'AI ASSISTED',
+                  style: TextStyle(
+                    color: AppColors.accent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth >= 720) {
+                return Row(
+                  children: tools.map((tool) {
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: _buildToolCard(context, tool, isDark),
+                      ),
+                    );
+                  }).toList(),
+                );
+              } else if (constraints.maxWidth >= 420) {
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: _buildToolCard(context, tools[0], isDark)),
+                        const SizedBox(width: 8),
+                        Expanded(child: _buildToolCard(context, tools[1], isDark)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(child: _buildToolCard(context, tools[2], isDark)),
+                        const SizedBox(width: 8),
+                        Expanded(child: _buildToolCard(context, tools[3], isDark)),
+                      ],
+                    ),
+                  ],
+                );
+              } else {
+                return Column(
+                  children: tools.map((tool) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildToolCard(context, tool, isDark),
+                    );
+                  }).toList(),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToolCard(BuildContext context, _AiToolItem tool, bool isDark) {
+    final theme = Theme.of(context);
+    final borderColor = isDark
+        ? Colors.white.withAlpha(20)
+        : theme.colorScheme.outline.withAlpha(35);
+    final cardBg = isDark
+        ? AppColors.darkSurfaceHigh
+        : theme.colorScheme.surfaceVariant.withAlpha(80);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: tool.onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: tool.color.withAlpha(28),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(tool.icon, color: tool.color, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      tool.title,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      tool.subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withAlpha((0.65 * 255).round()),
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: theme.colorScheme.onSurface.withAlpha((0.35 * 255).round()),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AiToolItem {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _AiToolItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
 }

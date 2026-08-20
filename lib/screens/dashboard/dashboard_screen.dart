@@ -9,6 +9,8 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/premium_card.dart';
 import '../../core/widgets/premium_text_field.dart';
 import '../../core/widgets/score_ring.dart';
+import '../../core/widgets/stat_card.dart';
+import '../../core/widgets/user_navigation.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/resume_progress_provider.dart';
 import '../../providers/resume_provider.dart';
@@ -22,7 +24,6 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  int _selectedIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -97,17 +98,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     context.push(AppRoutes.resumeEditorPath(newest.id));
   }
 
-  void _navigateTo(int index) {
-    if (index == 0) {
-      context.go(AppRoutes.dashboard);
-    } else if (index == 1) {
-      context.go(AppRoutes.profile);
-    } else if (index == 2) {
-      context.go(AppRoutes.settings);
-    }
-    setState(() => _selectedIndex = index);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -117,7 +107,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final avatarLetter = user?.fullName.isNotEmpty == true ? user!.fullName[0].toUpperCase() : 'A';
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: AppColors.background,
+      drawer: const UserNavigationDrawer(currentRoute: AppRoutes.dashboard),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -130,6 +121,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Builder(
+                          builder: (innerContext) => Container(
+                            margin: const EdgeInsets.only(right: AppSpacing.sm),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
+                              border: Border.all(
+                                color: theme.colorScheme.outline.withAlpha((0.15 * 255).round()),
+                              ),
+                            ),
+                            child: IconButton(
+                              tooltip: 'Open navigation menu',
+                              icon: Icon(Icons.menu, color: theme.colorScheme.onSurface, size: 22),
+                              onPressed: () => Scaffold.of(innerContext).openDrawer(),
+                            ),
+                          ),
+                        ),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,6 +174,118 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ),
                       ],
                     ),
+                    if (user?.role == 'admin') ...[
+                      const SizedBox(height: AppSpacing.md),
+                      PremiumCard(
+                        padding: const EdgeInsets.all(18),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isCompact = constraints.maxWidth < 600;
+                            final content = Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Text(
+                                      'Admin Console',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.accent,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Text(
+                                        'ADMIN',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.8,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'Manage your platform, users, resumes, and system metrics.',
+                                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                                ),
+                              ],
+                            );
+
+                            final actionButton = ElevatedButton.icon(
+                              onPressed: () => context.go(AppRoutes.adminOverview),
+                              icon: const Icon(Icons.arrow_forward, size: 16),
+                              label: const Text('Open Admin Console'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.accent,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                              ),
+                            );
+
+                            if (isCompact) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.accent.withAlpha(40),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(Icons.admin_panel_settings_outlined, color: AppColors.accent, size: 22),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(child: content),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: actionButton,
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accent.withAlpha(40),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.admin_panel_settings_outlined, color: AppColors.accent, size: 24),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(child: content),
+                                const SizedBox(width: 16),
+                                actionButton,
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.md),
                     Row(
                       children: [
@@ -190,60 +310,58 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              color: theme.colorScheme.primary,
-                              icon: Icons.edit_note_outlined,
-                              title: 'Create Resume',
-                              subtitle: 'New draft',
-                              onTap: _createResume,
+                    const SizedBox(height: AppSpacing.xl),
+                    Text('Overview', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                    const SizedBox(height: AppSpacing.sm),
+                    // KPI Row (responsive grid)
+                    resumeState.when(
+                      data: (resumes) {
+                        final total = resumes.length;
+                        final published = resumes.where((r) => r.status == 'published').length;
+                        final drafts = total - published;
+                        return LayoutBuilder(builder: (context, constraints) {
+                          final isWide = constraints.maxWidth >= 800;
+                          final children = [
+                            StatCard(label: 'Resumes', value: '$total', icon: Icons.description_outlined),
+                            StatCard(label: 'Published', value: '$published', icon: Icons.public, color: AppColors.success),
+                            StatCard(label: 'Drafts', value: '$drafts', icon: Icons.edit, color: AppColors.warning),
+                          ];
+                          if (isWide) {
+                            return Row(
+                              children: children
+                                  .map((c) => Expanded(child: Padding(padding: const EdgeInsets.only(right: 12), child: c)))
+                                  .toList(),
+                            );
+                          }
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: children
+                                  .map((c) => Padding(padding: const EdgeInsets.only(right: 12), child: SizedBox(width: 200, child: c)))
+                                  .toList(),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: _QuickActionCard(
-                              color: theme.colorScheme.secondary,
-                              icon: Icons.insights_outlined,
-                              title: 'Resume Intelligence',
-                              subtitle: 'Score & suggestions',
-                              onTap: () => context.push(AppRoutes.resume),
-                            ),
-                          ),
-                        ],
-                      ),
+                          );
+                        });
+                      },
+                      loading: () => const SizedBox(height: 80, child: Center(child: CircularProgressIndicator())),
+                      error: (_, __) => const SizedBox.shrink(),
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              color: AppColors.success,
-                              icon: Icons.grid_view_outlined,
-                              title: 'Templates',
-                              subtitle: 'Pick layout',
-                              onTap: () => context.push(AppRoutes.resume),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: _QuickActionCard(
-                              color: AppColors.warning,
-                              icon: Icons.folder_open_outlined,
-                              title: 'Library',
-                              subtitle: 'All resumes',
-                              onTap: () => context.push(AppRoutes.resumeList),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    Text('Workspace', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                    const SizedBox(height: AppSpacing.sm),
+                    LayoutBuilder(builder: (context, constraints) {
+                      final columns = constraints.maxWidth >= 1100 ? 4 : constraints.maxWidth >= 620 ? 2 : 1;
+                      final gap = AppSpacing.md;
+                      final itemWidth = (constraints.maxWidth - gap * (columns - 1)) / columns;
+                      final actions = [
+                        _QuickActionCard(color: theme.colorScheme.primary, icon: Icons.edit_note_outlined, title: 'Create Resume', subtitle: 'Start a new draft', onTap: _createResume),
+                        _QuickActionCard(color: theme.colorScheme.secondary, icon: Icons.insights_outlined, title: 'Resume Intelligence', subtitle: 'Score and improve', onTap: () => context.push(AppRoutes.resume)),
+                        _QuickActionCard(color: AppColors.success, icon: Icons.grid_view_outlined, title: 'Templates', subtitle: 'Choose a layout', onTap: () => context.push(AppRoutes.resume)),
+                        _QuickActionCard(color: AppColors.warning, icon: Icons.folder_open_outlined, title: 'Library', subtitle: 'Browse all resumes', onTap: () => context.push(AppRoutes.resumeList)),
+                      ];
+                      return Wrap(spacing: gap, runSpacing: gap, children: actions.map((action) => SizedBox(width: itemWidth, height: 142, child: action)).toList());
+                    }),
                     const SizedBox(height: AppSpacing.lg),
                     resumeState.when(
                       data: (resumes) {
@@ -437,18 +555,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: NavigationBar(
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: _navigateTo,
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
-            NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: 'Settings'),
-          ],
-        ),
-      ),
+      bottomNavigationBar: const UserBottomNavigation(selectedIndex: 0),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createResume,
         icon: const Icon(Icons.add),
@@ -471,10 +578,13 @@ class _QuickActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 116),
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+        constraints: const BoxConstraints(minHeight: 142),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -486,7 +596,7 @@ class _QuickActionCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
             Container(
               decoration: BoxDecoration(color: color.withAlpha((0.14 * 255).round()), borderRadius: BorderRadius.circular(AppRadius.sm)),
@@ -508,6 +618,7 @@ class _QuickActionCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ],
+        ),
         ),
       ),
     );

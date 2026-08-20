@@ -21,12 +21,12 @@ const allowedOrigins = (process.env.CLIENT_URL || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+const allowAnyDevelopmentOrigin = process.env.NODE_ENV !== 'production';
 
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.length === 0) return callback(null, process.env.NODE_ENV !== 'production');
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (allowAnyDevelopmentOrigin || allowedOrigins.includes(origin)) return callback(null, true);
     const corsError = new Error('Not allowed by CORS');
     corsError.status = 403;
     return callback(corsError);
@@ -84,8 +84,8 @@ connectDB()
   .then(async () => {
     await seedAdminAccount();
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on 0.0.0.0:${PORT}`);
     });
   })
   .catch((error) => {

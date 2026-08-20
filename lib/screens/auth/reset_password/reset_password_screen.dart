@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/premium_button.dart';
 import '../../../core/widgets/premium_card.dart';
@@ -75,76 +76,82 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => context.go(AppRoutes.login),
-                    icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.onSurface),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              PremiumCard(
-                padding: const EdgeInsets.all(24),
-                gradient: LinearGradient(
-                  colors: [theme.colorScheme.primary.withAlpha((0.15 * 255).round()), theme.colorScheme.surface],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+          child: LayoutBuilder(builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 800;
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: isWide ? 720 : double.infinity),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Reset your password', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Enter the code sent for ${widget.email} and choose a new password.',
-                      style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withAlpha((0.78 * 255).round()), height: 1.5),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => context.go(AppRoutes.login),
+                          icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.onSurface),
+                        ),
+                        const SizedBox(width: 8),
+                        SectionHeader(title: 'Reset your password'),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Form(
-                      key: _formKey,
+                    const SizedBox(height: AppSpacing.sm),
+                    PremiumCard(
+                      padding: const EdgeInsets.all(24),
+                      gradient: LinearGradient(
+                        colors: [theme.colorScheme.primary.withAlpha((0.15 * 255).round()), theme.colorScheme.surface],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          PremiumTextField(
-                            controller: _otpController,
-                            label: 'Reset code',
-                            hintText: 'Enter the code',
-                            keyboardType: TextInputType.number,
-                            validator: _validateOtp,
-                            prefixIcon: const Icon(Icons.pin_outlined),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumTextField(
-                            controller: _passwordController,
-                            label: 'New password',
-                            hintText: 'Enter new password',
-                            obscureText: !_showPassword,
-                            validator: Validators.validatePassword,
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => setState(() => _showPassword = !_showPassword),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumTextField(
-                            controller: _confirmPasswordController,
-                            label: 'Confirm new password',
-                            hintText: 'Re-enter new password',
-                            obscureText: !_showPassword,
-                            validator: (value) => Validators.validateConfirmPassword(value, _passwordController.text),
-                            prefixIcon: const Icon(Icons.lock_outline),
-                          ),
+                          Text('Enter the code sent for ${widget.email} and choose a new password.',
+                              style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withAlpha((0.78 * 255).round()), height: 1.5)),
                           const SizedBox(height: AppSpacing.lg),
-                          PremiumButton(
-                            label: 'Reset Password',
-                            onPressed: _handleReset,
-                            isLoading: isLoading,
-                            backgroundColor: theme.colorScheme.primary,
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                PremiumTextField(
+                                  controller: _otpController,
+                                  label: 'Reset code',
+                                  hintText: 'Enter the code',
+                                  keyboardType: TextInputType.number,
+                                  validator: _validateOtp,
+                                  prefixIcon: const Icon(Icons.pin_outlined),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumTextField(
+                                  controller: _passwordController,
+                                  label: 'New password',
+                                  hintText: 'Enter new password',
+                                  obscureText: !_showPassword,
+                                  validator: Validators.validatePassword,
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                                    onPressed: () => setState(() => _showPassword = !_showPassword),
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumTextField(
+                                  controller: _confirmPasswordController,
+                                  label: 'Confirm new password',
+                                  hintText: 'Re-enter new password',
+                                  obscureText: !_showPassword,
+                                  validator: (value) => Validators.validateConfirmPassword(value, _passwordController.text),
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                PremiumButton(
+                                  label: 'Reset Password',
+                                  onPressed: _handleReset,
+                                  isLoading: isLoading,
+                                  backgroundColor: theme.colorScheme.primary,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -152,8 +159,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ],
                 ),
               ),
-            ],
-          ),
+            );
+          }),
         ),
       ),
     );

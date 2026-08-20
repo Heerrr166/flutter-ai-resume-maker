@@ -13,10 +13,10 @@ class AppTheme {
     onPrimary: AppColors.onPrimary,
     secondary: AppColors.accent,
     onSecondary: AppColors.onAccent,
-    surface: AppColors.surface,
+    surface: const Color(0xFFFBFCFF),
     onSurface: AppColors.onSurface,
     surfaceTint: AppColors.surface,
-    surfaceContainerHighest: AppColors.background,
+    surfaceContainerHighest: const Color(0xFFEFF2F9),
     onSurfaceVariant: AppColors.onSurface,
     error: AppColors.error,
     onError: AppColors.onError,
@@ -52,16 +52,16 @@ class AppTheme {
   static final ThemeData light = ThemeData(
     useMaterial3: true,
     colorScheme: _lightColorScheme,
-    scaffoldBackgroundColor: _lightColorScheme.surface,
+    scaffoldBackgroundColor: AppColors.background,
     appBarTheme: AppBarTheme(
-      backgroundColor: _lightColorScheme.surface,
+      backgroundColor: AppColors.background,
       foregroundColor: _lightColorScheme.onSurface,
       elevation: 0,
       centerTitle: true,
     ),
     cardTheme: CardThemeData(
       color: _lightColorScheme.surface,
-      elevation: 8,
+      elevation: 3,
       shadowColor: AppColors.shadow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
     ),
@@ -93,7 +93,12 @@ class AppTheme {
     ),
     textTheme: GoogleFonts.poppinsTextTheme(
       Typography.material2021(platform: TargetPlatform.android).black,
-    ).apply(bodyColor: _lightColorScheme.onSurface, displayColor: _lightColorScheme.onSurface),
+    ).apply(bodyColor: _lightColorScheme.onSurface, displayColor: _lightColorScheme.onSurface).copyWith(
+      titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: _lightColorScheme.onSurface),
+      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _lightColorScheme.onSurface),
+      bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: _lightColorScheme.onSurface),
+      labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _lightColorScheme.onSurface.withOpacity(0.9)),
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: _lightColorScheme.primary,
@@ -222,7 +227,12 @@ class AppTheme {
     ),
     textTheme: GoogleFonts.poppinsTextTheme(
       Typography.material2021(platform: TargetPlatform.android).white,
-    ).apply(bodyColor: _darkColorScheme.onSurface, displayColor: _darkColorScheme.onSurface),
+    ).apply(bodyColor: _darkColorScheme.onSurface, displayColor: _darkColorScheme.onSurface).copyWith(
+      titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: _darkColorScheme.onSurface),
+      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _darkColorScheme.onSurface),
+      bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: _darkColorScheme.onSurface),
+      labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _darkColorScheme.onSurface.withOpacity(0.9)),
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: _darkColorScheme.primary,

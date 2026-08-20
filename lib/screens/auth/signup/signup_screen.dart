@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/premium_card.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/premium_button.dart';
 import '../../../core/widgets/premium_text_field.dart';
@@ -134,121 +136,113 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Create account', style: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Build your personalized resume workspace with built-in resume intelligence.',
-                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withAlpha((0.78 * 255).round()), height: 1.5),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha((0.08 * 255).round()),
-                          blurRadius: 24,
-                          offset: const Offset(0, 14),
+              child: LayoutBuilder(builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 900;
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: isWide ? 900 : double.infinity),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(title: 'Create account', subtitle: 'Build your personalized resume workspace'),
+                        const SizedBox(height: AppSpacing.sm),
+                        PremiumCard(
+                          padding: const EdgeInsets.all(24),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                PremiumTextField(
+                                  controller: _nameController,
+                                  label: 'Full Name',
+                                  hintText: 'Alex Johnson',
+                                  validator: Validators.validateName,
+                                  prefixIcon: const Icon(Icons.person_outline),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumTextField(
+                                  controller: _emailController,
+                                  label: 'Email address',
+                                  hintText: 'you@example.com',
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: Validators.validateEmail,
+                                  prefixIcon: const Icon(Icons.email_outlined),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumTextField(
+                                  controller: _phoneController,
+                                  label: 'Mobile number',
+                                  hintText: '+91 98765 43210',
+                                  keyboardType: TextInputType.phone,
+                                  validator: Validators.validatePhone,
+                                  prefixIcon: const Icon(Icons.phone_outlined),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumTextField(
+                                  controller: _passwordController,
+                                  label: 'Password',
+                                  hintText: 'Enter password',
+                                  obscureText: !_showPassword,
+                                  validator: _validatePasswordStrength,
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                                    onPressed: () => setState(() => _showPassword = !_showPassword),
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Strength: $_passwordStrengthLabel', style: theme.textTheme.bodySmall),
+                                    Text('${(_passwordStrength * 100).round()}%', style: theme.textTheme.bodySmall),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                LinearProgressIndicator(value: _passwordStrength, minHeight: 8),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumTextField(
+                                  controller: _confirmPasswordController,
+                                  label: 'Confirm password',
+                                  hintText: 'Re-enter password',
+                                  obscureText: !_showPassword,
+                                  validator: (value) => Validators.validateConfirmPassword(value, _passwordController.text),
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                CheckboxListTile(
+                                  value: _acceptTerms,
+                                  onChanged: (checked) => setState(() => _acceptTerms = checked ?? false),
+                                  title: const Text('I agree to the Terms & Conditions'),
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                  contentPadding: EdgeInsets.zero,
+                                  activeColor: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumButton(
+                                  label: 'Create account',
+                                  onPressed: _acceptTerms ? _handleCreateAccount : null,
+                                  isLoading: isLoading,
+                                  icon: const Icon(Icons.check_circle_outline),
+                                  backgroundColor: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                Center(
+                                  child: TextButton(
+                                    onPressed: () => context.go(AppRoutes.login),
+                                    child: const Text('Already have an account? Login'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.all(24),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          PremiumTextField(
-                            controller: _nameController,
-                            label: 'Full Name',
-                            hintText: 'Alex Johnson',
-                            validator: Validators.validateName,
-                            prefixIcon: const Icon(Icons.person_outline),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumTextField(
-                            controller: _emailController,
-                            label: 'Email address',
-                            hintText: 'you@example.com',
-                            keyboardType: TextInputType.emailAddress,
-                            validator: Validators.validateEmail,
-                            prefixIcon: const Icon(Icons.email_outlined),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumTextField(
-                            controller: _phoneController,
-                            label: 'Mobile number',
-                            hintText: '+91 98765 43210',
-                            keyboardType: TextInputType.phone,
-                            validator: Validators.validatePhone,
-                            prefixIcon: const Icon(Icons.phone_outlined),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumTextField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            hintText: 'Enter password',
-                            obscureText: !_showPassword,
-                            validator: _validatePasswordStrength,
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => setState(() => _showPassword = !_showPassword),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Strength: $_passwordStrengthLabel', style: theme.textTheme.bodySmall),
-                              Text('${(_passwordStrength * 100).round()}%', style: theme.textTheme.bodySmall),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          LinearProgressIndicator(value: _passwordStrength, minHeight: 8),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumTextField(
-                            controller: _confirmPasswordController,
-                            label: 'Confirm password',
-                            hintText: 'Re-enter password',
-                            obscureText: !_showPassword,
-                            validator: (value) => Validators.validateConfirmPassword(value, _passwordController.text),
-                            prefixIcon: const Icon(Icons.lock_outline),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          CheckboxListTile(
-                            value: _acceptTerms,
-                            onChanged: (checked) => setState(() => _acceptTerms = checked ?? false),
-                            title: const Text('I agree to the Terms & Conditions'),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            contentPadding: EdgeInsets.zero,
-                            activeColor: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumButton(
-                            label: 'Create account',
-                            onPressed: _acceptTerms ? _handleCreateAccount : null,
-                            isLoading: isLoading,
-                            icon: const Icon(Icons.check_circle_outline),
-                            backgroundColor: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          Center(
-                            child: TextButton(
-                              onPressed: () => context.go(AppRoutes.login),
-                              child: const Text('Already have an account? Login'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-                ],
-              ),
+                );
+              }),
             ),
           ),
         ],

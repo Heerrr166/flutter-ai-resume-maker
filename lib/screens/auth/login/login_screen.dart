@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/premium_card.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/premium_button.dart';
 import '../../../core/widgets/premium_text_field.dart';
@@ -21,6 +23,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _showPassword = false;
+  bool _isAdminMode = false;
   late final AnimationController _shapeController;
 
   @override
@@ -48,7 +51,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
           );
       if (success) {
         if (mounted) {
-          context.go(AppRoutes.dashboard);
+          final user = ref.read(authNotifierProvider).user;
+          if (_isAdminMode) {
+            if (user?.role == 'admin') {
+              context.go(AppRoutes.adminOverview);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Account is not an administrator.')),
+              );
+            }
+          } else {
+            context.go(AppRoutes.dashboard);
+          }
         }
       } else {
         final error = ref.read(authNotifierProvider).errorMessage;
@@ -114,128 +128,153 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Hero(
-                        tag: 'app-logo',
-                        child: Material(
-                          color: Colors.white,
-                          elevation: 8,
-                          shape: const CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Icon(Icons.work_outline, size: 28, color: theme.colorScheme.primary),
-                          ),
+              child: LayoutBuilder(builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 800;
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: isWide ? 920 : double.infinity),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Hero(
+                              tag: 'app-logo',
+                              child: Material(
+                                color: Colors.white,
+                                elevation: 8,
+                                shape: const CircleBorder(),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Icon(Icons.work_outline, size: 28, color: theme.colorScheme.primary),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('AI Resume Maker', style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                Text('Premium career builder', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('AI Resume Maker', style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text('Premium career builder', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Welcome Back', style: theme.textTheme.displaySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Sign in to access your resume intelligence tools and custom templates.',
-                      style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white.withAlpha((0.9 * 255).round()), height: 1.5),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha((0.12 * 255).round()),
-                          blurRadius: 24,
-                          offset: const Offset(0, 12),
+                        const SizedBox(height: 28),
+                        SectionHeader(title: 'Welcome Back', subtitle: 'Sign in to access your resume intelligence tools.'),
+                        const SizedBox(height: 12),
+                        PremiumCard(
+                          padding: const EdgeInsets.all(24),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                PremiumTextField(
+                                  controller: _emailController,
+                                  label: 'Email address',
+                                  hintText: 'you@example.com',
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: Validators.validateEmail,
+                                  prefixIcon: const Icon(Icons.email_outlined),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumTextField(
+                                  controller: _passwordController,
+                                  label: 'Password',
+                                  hintText: 'Enter password',
+                                  obscureText: !_showPassword,
+                                  validator: Validators.validatePassword,
+                                  autofillHints: const [AutofillHints.newPassword],
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                                    onPressed: () => setState(() => _showPassword = !_showPassword),
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                // Forgot password
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () => context.go(AppRoutes.forgotPassword),
+                                    child: const Text('Forgot password?'),
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PremiumButton(
+                                  label: 'Login',
+                                  icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                                  onPressed: _handleLogin,
+                                  isLoading: isLoading,
+                                  backgroundColor: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text('Don’t have an account? '),
+                                    TextButton(
+                                      onPressed: () => context.go(AppRoutes.signup),
+                                      child: const Text('Sign Up'),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                Row(
+                                  children: [
+                                    Expanded(child: Divider(color: theme.colorScheme.onSurface.withOpacity(0.12))),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      child: Text('OR', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+                                    ),
+                                    Expanded(child: Divider(color: theme.colorScheme.onSurface.withOpacity(0.12))),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(Icons.admin_panel_settings_outlined, color: theme.colorScheme.primary, size: 24),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('ADMIN ACCESS', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.primary)),
+                                          const SizedBox(height: 4),
+                                          Text('Manage users, resumes & platform administration', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
+                                          const SizedBox(height: 12),
+                                          OutlinedButton.icon(
+                                            onPressed: () => setState(() => _isAdminMode = !_isAdminMode),
+                                            icon: Icon(_isAdminMode ? Icons.check_circle : Icons.shield),
+                                            label: Text(_isAdminMode ? 'Admin mode active (tap to cancel)' : 'Login as Admin'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (isWide) ...[
+                                  const SizedBox(height: AppSpacing.lg),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      _LoginAccessory(label: 'Fingerprint', icon: Icons.fingerprint),
+                                      _LoginAccessory(label: 'Fast access', icon: Icons.shield),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.all(24),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          PremiumTextField(
-                            controller: _emailController,
-                            label: 'Email address',
-                            hintText: 'you@example.com',
-                            keyboardType: TextInputType.emailAddress,
-                            validator: Validators.validateEmail,
-                            prefixIcon: const Icon(Icons.email_outlined),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumTextField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            hintText: 'Enter password',
-                            obscureText: !_showPassword,
-                            validator: Validators.validatePassword,
-                            autofillHints: const [AutofillHints.newPassword],
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => setState(() => _showPassword = !_showPassword),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () => context.go(AppRoutes.forgotPassword),
-                              child: const Text('Forgot password?'),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          PremiumButton(
-                            label: 'Login',
-                            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                            onPressed: _handleLogin,
-                            isLoading: isLoading,
-                            backgroundColor: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('Don’t have an account? '),
-                              TextButton(
-                                onPressed: () => context.go(AppRoutes.signup),
-                                child: const Text('Sign Up'),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _LoginAccessory(label: 'Fingerprint', icon: Icons.fingerprint),
-                              _LoginAccessory(label: 'Fast access', icon: Icons.shield),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-                ],
-              ),
+                );
+              }),
             ),
           ),
         ],

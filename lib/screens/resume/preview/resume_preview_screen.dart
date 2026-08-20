@@ -39,7 +39,26 @@ class _ResumePreviewScreenState extends State<ResumePreviewScreen> {
     final fileName = '${resume.title.isEmpty ? 'resume' : resume.title.replaceAll(RegExp(r'[^\w\s-]'), '').trim()}.pdf';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Resume Preview')),
+      appBar: AppBar(title: const Text('Resume Preview'), actions: [
+        IconButton(
+          tooltip: 'Edit',
+          icon: const Icon(Icons.edit),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        IconButton(
+          tooltip: 'Export PDF',
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          onPressed: () async {
+            try {
+              final bytes = await PdfGenerator.generate(resume);
+              await Printing.sharePdf(bytes: bytes, filename: fileName);
+            } catch (e) {
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to export PDF')));
+            }
+          },
+        ),
+      ]),
       body: PdfPreview(
         build: (format) => PdfGenerator.generate(resume),
         pdfFileName: fileName,

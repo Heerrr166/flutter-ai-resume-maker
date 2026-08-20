@@ -14,25 +14,34 @@ class TemplatePickerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Choose a Template')),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery.of(context).size.width > 700 ? 3 : 2,
-          mainAxisSpacing: AppSpacing.md,
-          crossAxisSpacing: AppSpacing.md,
-          childAspectRatio: 0.62,
-        ),
-        itemCount: ResumeTemplateType.values.length,
-        itemBuilder: (context, index) {
-          final type = ResumeTemplateType.values[index];
-          final isSelected = type.id == currentTemplateId;
-          return _TemplateCard(
-            type: type,
-            isSelected: isSelected,
-            onTap: () => Navigator.of(context).pop(type.id),
-          );
-        },
-      ),
+      body: LayoutBuilder(builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final cross = width > 1200 ? 4 : (width > 900 ? 3 : (width > 600 ? 2 : 1));
+        return RadioGroup<String>(
+          groupValue: currentTemplateId,
+          onChanged: (value) {
+            if (value != null) Navigator.of(context).pop(value);
+          },
+          child: GridView.builder(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: cross,
+              mainAxisSpacing: AppSpacing.md,
+              crossAxisSpacing: AppSpacing.md,
+              childAspectRatio: 0.62,
+            ),
+            itemCount: ResumeTemplateType.values.length,
+            itemBuilder: (context, index) {
+              final type = ResumeTemplateType.values[index];
+              return _TemplateCard(
+                type: type,
+                isSelected: type.id == currentTemplateId,
+                onTap: () => Navigator.of(context).pop(type.id),
+              );
+            },
+          ),
+        );
+    }),
     );
   }
 }
@@ -78,9 +87,15 @@ class _TemplateCard extends StatelessWidget {
                   ),
                 ),
                 if (isSelected)
-                  Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 18)
+                  Radio<String>(
+                    value: type.id,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  )
                 else
-                  Icon(Icons.circle_outlined, color: theme.colorScheme.outlineVariant, size: 18),
+                  Radio<String>(
+                    value: type.id,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
               ],
             ),
             const SizedBox(height: 4),

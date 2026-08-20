@@ -23,10 +23,11 @@ class PremiumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(
+    return Card(
       elevation: elevation,
       shadowColor: theme.colorScheme.shadow,
-      borderRadius: BorderRadius.circular(borderRadius),
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
       child: Container(
         decoration: BoxDecoration(
           color: color ?? theme.colorScheme.surface,

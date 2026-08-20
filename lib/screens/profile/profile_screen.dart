@@ -7,6 +7,7 @@ import '../../core/utils/validators.dart';
 import '../../core/widgets/premium_button.dart';
 import '../../core/widgets/premium_card.dart';
 import '../../core/widgets/premium_text_field.dart';
+import '../../core/widgets/user_navigation.dart';
 import '../../providers/auth_provider.dart';
 import '../../routes/app_routes.dart';
 
@@ -92,6 +93,7 @@ class ProfileScreen extends ConsumerWidget {
     final phone = user?.phone ?? 'Not available';
 
     return Scaffold(
+      drawer: const UserNavigationDrawer(currentRoute: AppRoutes.profile),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: theme.colorScheme.surface,
@@ -197,35 +199,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: NavigationBar(
-          selectedIndex: 1,
-          onDestinationSelected: (index) {
-            if (index == 0) {
-              context.go(AppRoutes.dashboard);
-            } else if (index == 1) {
-              context.go(AppRoutes.profile);
-            } else if (index == 2) {
-              context.go(AppRoutes.settings);
-            }
-          },
-          destinations: const [
-            NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Home'),
-            NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
-                label: 'Profile'),
-            NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings),
-                label: 'Settings'),
-          ],
-        ),
-      ),
+      bottomNavigationBar: const UserBottomNavigation(selectedIndex: 1),
     );
   }
 }

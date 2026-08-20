@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/premium_card.dart';
+import '../../core/widgets/user_navigation.dart';
 import '../../providers/app_providers.dart';
 import '../../routes/app_routes.dart';
 
@@ -35,6 +36,7 @@ class SettingsScreen extends ConsumerWidget {
     final weeklySummaryEnabled = ref.watch(weeklySummaryEnabledProvider);
 
     return Scaffold(
+      drawer: const UserNavigationDrawer(currentRoute: AppRoutes.settings),
       appBar: AppBar(
         title: const Text('Settings'),
         elevation: 0,
@@ -131,35 +133,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: NavigationBar(
-          selectedIndex: 2,
-          onDestinationSelected: (index) {
-            if (index == 0) {
-              context.go(AppRoutes.dashboard);
-            } else if (index == 1) {
-              context.go(AppRoutes.profile);
-            } else if (index == 2) {
-              context.go(AppRoutes.settings);
-            }
-          },
-          destinations: const [
-            NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Home'),
-            NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
-                label: 'Profile'),
-            NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings),
-                label: 'Settings'),
-          ],
-        ),
-      ),
+      bottomNavigationBar: const UserBottomNavigation(selectedIndex: 2),
     );
   }
 }

@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../models/auth_state.dart';
 import '../routes/app_routes.dart';
 import '../screens/admin/admin_users_screen.dart';
+import '../screens/admin/admin_overview_screen.dart';
+import '../screens/admin/admin_resumes_screen.dart';
+import '../screens/admin/admin_analytics_screen.dart';
 import '../screens/auth/forgot_password/forgot_password_screen.dart';
 import '../screens/auth/login/login_screen.dart';
 import '../screens/auth/reset_password/reset_password_screen.dart';
@@ -105,7 +108,8 @@ String? _authRedirect(GoRouterState state, AuthState auth) {
     if (AppRoutes.authEntryRoutes.contains(location)) {
       return AppRoutes.dashboard;
     }
-    if (location == AppRoutes.adminUsers && auth.user?.role != 'admin') {
+    // Protect any admin route under /admin/*
+    if (location.startsWith('/admin') && auth.user?.role != 'admin') {
       return AppRoutes.dashboard;
     }
     return null;
@@ -202,6 +206,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.adminUsers,
         name: AppRoutes.adminUsersName,
         builder: (context, state) => const AdminUsersScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminOverview,
+        name: AppRoutes.adminOverviewName,
+        builder: (context, state) => const AdminOverviewScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminResumes,
+        name: AppRoutes.adminResumesName,
+        builder: (context, state) => const AdminResumesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminAnalytics,
+        name: AppRoutes.adminAnalyticsName,
+        builder: (context, state) => const AdminAnalyticsScreen(),
       ),
     ],
   );

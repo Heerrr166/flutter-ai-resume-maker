@@ -5,15 +5,16 @@ class SectionHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.subtitle,
-    this.action,
+    this.trailing,
   });
 
   final String title;
   final String? subtitle;
-  final Widget? action;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -23,20 +24,19 @@ class SectionHeader extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            subtitle != null
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      subtitle!,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  )
-                : const SizedBox.shrink(),
+            if (subtitle != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  subtitle!,
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
           ],
         ),
-        action ?? const SizedBox.shrink(),
+        trailing ?? const SizedBox.shrink(),
       ],
     );
   }

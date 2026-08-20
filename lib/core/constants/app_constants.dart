@@ -1,3 +1,5 @@
+import 'app_host.dart';
+
 class AppConstants {
   AppConstants._();
 
@@ -7,5 +9,5 @@ class AppConstants {
       'Build a professional resume with AI-powered writing help and local resume intelligence, then export it in seconds.';
   static const Duration splashDelay = Duration(seconds: 2);
 
-  static const String apiBaseUrl = 'http://172.20.10.2:5000/api';
+  static String get apiBaseUrl => 'http://${currentApiHost()}:5000/api';
 }
