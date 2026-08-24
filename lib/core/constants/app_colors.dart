@@ -38,6 +38,14 @@ class AppColors {
   static const Color scoreFair = Color(0xFFDF9B13);
   static const Color scorePoor = Color(0xFFEF4444);
 
+  // Admin branding & accent colors for Admin Access CTA and Console
+  static const Color adminPrimary = Color(0xFF4F46E5);
+  static const Color adminSecondary = Color(0xFF6366F1);
+  static const Color adminBadge = Color(0xFF3730A3);
+  static const Color adminGlow = Color(0xFF818CF8);
+  static const Color adminContainerLight = Color(0xFFEEF2FF);
+  static const Color adminContainerDark = Color(0xFF1E1B4B);
+
   static Color forScore(num value) {
     if (value >= 80) return scoreExcellent;
     if (value >= 60) return scoreGood;
@@ -45,3 +53,4 @@ class AppColors {
     return scorePoor;
   }
 }
+

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const resumeController = require('../controllers/resumeController');
-const { authenticate } = require('../middleware/authMiddleware');
+const { authenticate, authorize } = require('../middleware/authMiddleware');
 const { resumeLimiter } = require('../middleware/rateLimiter');
 const { validate } = require('../middleware/validate');
 const {
@@ -11,6 +11,9 @@ const {
 } = require('../middleware/resumeValidators');
 
 router.use(resumeLimiter);
+
+// Platform-wide resumes for Admin Console
+router.get('/admin/all', authenticate, authorize('admin'), resumeController.getAllResumesAdmin);
 
 router.post('/', authenticate, createResumeRules, validate, resumeController.createResume);
 router.get('/', authenticate, resumeController.getResumes);

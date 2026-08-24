@@ -10,6 +10,25 @@ const SectionSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const TEMPLATE_IDS = [
+  'modern',
+  'minimalAts',
+  'professional',
+  'creative',
+  'executive',
+  'techDeveloper',
+  'dataAnalytics',
+  'corporate',
+  'studentFresher',
+  'academic',
+  'marketing',
+  'finance',
+  'elegantMonochrome',
+  'boldHeader',
+  'cleanTwoColumn',
+  'compactAts',
+];
+
 const resumeSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -21,7 +40,7 @@ const resumeSchema = new mongoose.Schema(
     status: { type: String, enum: ['draft', 'published'], default: 'draft' },
     template: {
       type: String,
-      enum: ['modern', 'minimalAts', 'professional', 'creative', 'executive'],
+      enum: TEMPLATE_IDS,
       default: 'modern',
     },
   },

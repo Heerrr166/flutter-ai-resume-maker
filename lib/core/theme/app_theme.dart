@@ -97,7 +97,7 @@ class AppTheme {
       titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: _lightColorScheme.onSurface),
       titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _lightColorScheme.onSurface),
       bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: _lightColorScheme.onSurface),
-      labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _lightColorScheme.onSurface.withOpacity(0.9)),
+      labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _lightColorScheme.onSurface.withAlpha((0.9 * 255).round())),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -231,7 +231,7 @@ class AppTheme {
       titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: _darkColorScheme.onSurface),
       titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: _darkColorScheme.onSurface),
       bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: _darkColorScheme.onSurface),
-      labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _darkColorScheme.onSurface.withOpacity(0.9)),
+      labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _darkColorScheme.onSurface.withAlpha((0.9 * 255).round())),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(

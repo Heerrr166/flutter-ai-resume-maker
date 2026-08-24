@@ -10,10 +10,15 @@ class PremiumButton extends StatelessWidget {
     this.isLoading = false,
     this.enabled = true,
     this.icon,
+    this.trailingIcon,
     this.backgroundColor,
     this.foregroundColor,
+    this.gradient,
+    this.borderSide,
     this.borderRadius = AppRadius.md,
-    this.padding = const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
+    this.elevation = 4,
+    this.padding = const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+    this.textStyle,
   });
 
   final String label;
@@ -21,51 +26,111 @@ class PremiumButton extends StatelessWidget {
   final bool isLoading;
   final bool enabled;
   final Widget? icon;
+  final Widget? trailingIcon;
   final Color? backgroundColor;
   final Color? foregroundColor;
+  final Gradient? gradient;
+  final BorderSide? borderSide;
   final double borderRadius;
+  final double elevation;
   final EdgeInsetsGeometry padding;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
-    final color = backgroundColor ?? Theme.of(context).colorScheme.primary;
-    final textColor = foregroundColor ?? Theme.of(context).colorScheme.onPrimary;
+    final theme = Theme.of(context);
+    final color = backgroundColor ?? theme.colorScheme.primary;
+    final textColor = foregroundColor ?? theme.colorScheme.onPrimary;
+    final isInteractive = enabled && !isLoading;
+
+    final content = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      child: isLoading
+          ? SizedBox(
+              key: const ValueKey('loading'),
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: textColor,
+                strokeWidth: 2.4,
+              ),
+            )
+          : Row(
+              key: const ValueKey('content'),
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  icon!,
+                  const SizedBox(width: 10),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    style: (textStyle ??
+                            theme.textTheme.labelLarge?.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ))
+                        ?.copyWith(color: textColor),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (trailingIcon != null) ...[
+                  const SizedBox(width: 10),
+                  trailingIcon!,
+                ],
+              ],
+            ),
+    );
+
+    if (gradient != null) {
+      return Opacity(
+        opacity: enabled ? 1 : 0.55,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: borderSide != null ? Border.fromBorderSide(borderSide!) : null,
+            boxShadow: [
+              if (elevation > 0 && enabled)
+                BoxShadow(
+                  color: (backgroundColor ?? theme.colorScheme.primary).withAlpha((0.28 * 255).round()),
+                  blurRadius: elevation * 2,
+                  offset: Offset(0, elevation),
+                ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: isInteractive ? onPressed : null,
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: Padding(
+                padding: padding,
+                child: Center(child: content),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Opacity(
       opacity: enabled ? 1 : 0.55,
       child: ElevatedButton(
-        onPressed: enabled && !isLoading ? onPressed : null,
+        onPressed: isInteractive ? onPressed : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           foregroundColor: textColor,
+          side: borderSide,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
           padding: padding,
-          elevation: 8,
-          shadowColor: Theme.of(context).colorScheme.shadow,
+          elevation: elevation,
+          shadowColor: theme.colorScheme.shadow,
         ),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          child: isLoading
-              ? SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    color: textColor,
-                    strokeWidth: 2.4,
-                  ),
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (icon != null) ...[
-                      icon!,
-                      const SizedBox(width: 10),
-                    ],
-                    Text(label, style: TextStyle(fontWeight: FontWeight.w600)),
-                  ],
-                ),
-        ),
+        child: content,
       ),
     );
   }

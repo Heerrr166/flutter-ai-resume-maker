@@ -96,23 +96,49 @@ class _ResumeHomeScreenState extends ConsumerState<ResumeHomeScreen> {
     final theme = Theme.of(context);
     final state = ref.watch(resumeNotifierProvider);
 
-    const templateIcons = {
-      ResumeTemplateType.modern: Icons.space_dashboard_outlined,
-      ResumeTemplateType.minimalAts: Icons.fact_check_outlined,
-      ResumeTemplateType.professional: Icons.badge_outlined,
-      ResumeTemplateType.creative: Icons.palette_outlined,
-      ResumeTemplateType.executive: Icons.workspace_premium_outlined,
-    };
-    const templateColors = {
-      ResumeTemplateType.modern: Colors.blue,
-      ResumeTemplateType.minimalAts: Colors.deepOrange,
-      ResumeTemplateType.professional: Colors.indigo,
-      ResumeTemplateType.creative: Colors.teal,
-      ResumeTemplateType.executive: Colors.brown,
-    };
+    IconData getTemplateIcon(ResumeTemplateType t) {
+      switch (t) {
+        case ResumeTemplateType.modern:
+          return Icons.space_dashboard_outlined;
+        case ResumeTemplateType.minimalAts:
+        case ResumeTemplateType.compactAts:
+          return Icons.fact_check_outlined;
+        case ResumeTemplateType.professional:
+        case ResumeTemplateType.corporate:
+        case ResumeTemplateType.finance:
+          return Icons.badge_outlined;
+        case ResumeTemplateType.creative:
+        case ResumeTemplateType.marketing:
+          return Icons.palette_outlined;
+        case ResumeTemplateType.executive:
+        case ResumeTemplateType.boldHeader:
+          return Icons.workspace_premium_outlined;
+        case ResumeTemplateType.techDeveloper:
+        case ResumeTemplateType.dataAnalytics:
+          return Icons.code_rounded;
+        case ResumeTemplateType.studentFresher:
+          return Icons.school_outlined;
+        case ResumeTemplateType.academic:
+          return Icons.menu_book_rounded;
+        case ResumeTemplateType.elegantMonochrome:
+        case ResumeTemplateType.cleanTwoColumn:
+          return Icons.view_column_outlined;
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back',
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.dashboard);
+            }
+          },
+        ),
         title: const Text('Resume Hub'),
         actions: [
           IconButton(
@@ -123,7 +149,7 @@ class _ResumeHomeScreenState extends ConsumerState<ResumeHomeScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.fromLTRB(20, 20, 20, 88.0 + MediaQuery.of(context).padding.bottom),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -188,67 +214,85 @@ class _ResumeHomeScreenState extends ConsumerState<ResumeHomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Choose Template Layout',
+                  'Choose Template Layout (${ResumeTemplateType.values.length} Templates)',
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              height: 148,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: ResumeTemplateType.values.length,
-                itemBuilder: (context, index) {
-                  final type = ResumeTemplateType.values[index];
-                  final color = templateColors[type]!;
-                  return GestureDetector(
-                    onTap: () => _createAndOpenEditor('Untitled Resume', type.id),
-                    child: Container(
-                      width: 160,
-                      margin: const EdgeInsets.only(right: 14),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: color.withAlpha((0.3 * 255).round()),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha((0.04 * 255).round()),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 600;
+                final cardWidth = isMobile
+                    ? ((constraints.maxWidth - 12) / 2.15).clamp(145.0, 185.0)
+                    : 165.0;
+                final cardHeight = isMobile ? 154.0 : 150.0;
+
+                return SizedBox(
+                  height: cardHeight,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: ResumeTemplateType.values.length,
+                    itemBuilder: (context, index) {
+                      final type = ResumeTemplateType.values[index];
+                      final color = Color(type.primaryColorValue);
+                      return GestureDetector(
+                        onTap: () => _createAndOpenEditor('Untitled Resume', type.id),
+                        child: Container(
+                          width: cardWidth,
+                          margin: EdgeInsets.only(
+                            right: index == ResumeTemplateType.values.length - 1 ? 0 : 12,
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(templateIcons[type], color: color, size: 26),
-                          const Spacer(),
-                          Text(
-                            type.label,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: color.withAlpha((0.3 * 255).round()),
+                              width: 1.5,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha((0.04 * 255).round()),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Start with this template',
-                            style: theme.textTheme.bodySmall?.copyWith(color: color),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(getTemplateIcon(type), color: color, size: 24),
+                              const Spacer(),
+                              Text(
+                                type.label,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13.5,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                type.category,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: color,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11.5,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
             const SizedBox(height: AppSpacing.lg),
             Row(
@@ -350,8 +394,9 @@ class _ResumeHomeScreenState extends ConsumerState<ResumeHomeScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _createAndOpenEditor(),
-        icon: const Icon(Icons.add),
-        label: const Text('New Resume'),
+        icon: const Icon(Icons.add_rounded, size: 18),
+        label: const Text('New Resume', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+        elevation: 4,
       ),
     );
   }

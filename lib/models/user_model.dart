@@ -6,6 +6,7 @@ class UserModel {
   final String role;
   final String profileImage;
   final bool isVerified;
+  final String createdAt;
 
   UserModel({
     required this.id,
@@ -15,6 +16,7 @@ class UserModel {
     required this.role,
     required this.profileImage,
     required this.isVerified,
+    this.createdAt = '',
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class UserModel {
       role: json['role'] as String? ?? 'user',
       profileImage: json['profileImage'] as String? ?? '',
       isVerified: json['isVerified'] as bool? ?? false,
+      createdAt: json['createdAt'] as String? ?? '',
     );
   }
 
@@ -38,6 +41,7 @@ class UserModel {
       'role': role,
       'profileImage': profileImage,
       'isVerified': isVerified,
+      'createdAt': createdAt,
     };
   }
 }

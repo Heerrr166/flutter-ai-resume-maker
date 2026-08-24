@@ -31,7 +31,24 @@ const sectionsValidator = (sections) => {
 
 const resumeIdParamRules = [param('id').isMongoId().withMessage('Invalid resume id')];
 
-const TEMPLATE_IDS = ['modern', 'minimalAts', 'professional', 'creative', 'executive'];
+const TEMPLATE_IDS = [
+  'modern',
+  'minimalAts',
+  'professional',
+  'creative',
+  'executive',
+  'techDeveloper',
+  'dataAnalytics',
+  'corporate',
+  'studentFresher',
+  'academic',
+  'marketing',
+  'finance',
+  'elegantMonochrome',
+  'boldHeader',
+  'cleanTwoColumn',
+  'compactAts',
+];
 
 const createResumeRules = [
   body('title').trim().notEmpty().withMessage('Title is required').isLength({ max: 200 }),
@@ -54,4 +71,4 @@ const updateResumeRules = [
   body('coverLetter').optional().isString().isLength({ max: 5000 }),
 ];
 
-module.exports = { resumeIdParamRules, createResumeRules, updateResumeRules };
+module.exports = { resumeIdParamRules, createResumeRules, updateResumeRules, TEMPLATE_IDS };
